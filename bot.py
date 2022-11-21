@@ -6,9 +6,12 @@ import functions
 
 BOT_API = ''
 bot = telebot.TeleBot(BOT_API)
+
+# глобальные перменные для хранения введенных пользователем значений
 input_key = ''
 input_lad = ''
 
+# настройки для логирования
 logging.basicConfig(
     level=logging.ERROR,
     filename="errorlog.log",
@@ -16,6 +19,8 @@ logging.basicConfig(
               %(lineno)d - %(message)s",
     datefmt='%H:%M:%S',
 )
+
+# еще один вид логирования
 
 
 def logging_decorator(func):
@@ -59,7 +64,8 @@ def get_user_text(message):
 
     input_text = (message.text).lower()
     if input_text in ['лады', 'лад']:
-        bot.send_message(message.chat.id, ', '.join(list(functions.get_harmonies().keys())))
+        bot.send_message(message.chat.id, ', '.join(
+            list(functions.get_harmonies().keys())))
     elif input_text in ['тональность', 'тон', 'ноты', 'нота']:
         bot.send_message(message.chat.id, '  '.join(functions.get_gamma()))
 
@@ -69,7 +75,7 @@ def get_user_text(message):
         key = draw_buttons(functions.get_gamma())
         msg = bot.send_message(
             message.chat.id, 'В каком ключе?', reply_markup=key)
-        bot.register_next_step_handler(msg, get_key, message.text)
+        bot.register_next_step_handler(msg, get_key, input_text)
 
     elif input_text in ['аккорды', 'аккорд']:
         # спросить тон, лад (по умолчанию натуральный мажор)
@@ -110,7 +116,8 @@ def get_harm(message, init_request):
         bot.send_message(message.chat.id, 'Введенное значение некорректно')
     else:
         if init_request in ['гамма']:
-            gamma = functions.get_gamma_by_key(input_key, input_lad)
+            gamma = functions.get_gamma_by_key_and_harmony(
+                input_key, input_lad)
             bot.send_message(message.chat.id, '  '.join(gamma))
         elif init_request in ['аккорды', 'аккорд']:
             chords = functions.get_chords_by_key_and_harmony(
